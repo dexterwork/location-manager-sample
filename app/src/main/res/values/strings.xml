@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">LocationSample</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <string name="to_location">請定位</string>
+    <string name="provider">定位提供者</string>
+    <string name="non_provider">沒有定位提供者</string>
+    <string name="non_location">沒有取得座標</string>
 </resources>
