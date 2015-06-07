@@ -1,7 +1,7 @@
 package studio.dexter.tools;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -10,34 +10,75 @@ import android.location.LocationProvider;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import java.util.List;
+
+import studio.dexter.locationsample.MainActivity;
+
 /**
  * Created by dexter on 2015/6/6.
  */
 public class MLocationManager implements LocationListener {
-    Activity activity;
+    MainActivity activity;
     LocationManager locationManager;
     String provider;
+    Location location;
 
-    public MLocationManager(Activity activity) {
+    private final long MIN_TIME=2000;
+    private final float MIN_DISTANCE=10;
+
+    public MLocationManager(MainActivity activity) {
         this.activity = activity;
         init();
     }
 
     private void init() {
+
         locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-        provider = locationManager.getBestProvider(new Criteria(), true);
+
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setCostAllowed(true);
+        criteria.setPowerRequirement(Criteria.POWER_LOW);
+
+
+//        provider = locationManager.getBestProvider(criteria, true);
+        List<String> providerList;
+        providerList=locationManager.getProviders(criteria,true);
+        if(providerList.contains(LocationManager.NETWORK_PROVIDER)){
+            provider=LocationManager.NETWORK_PROVIDER;
+            MLog.i(this,"dex provider list contains NETWORK.");
+        }else{
+            provider=LocationManager.PASSIVE_PROVIDER;
+            MLog.i(this,"dex provider list just PASSIVE.");
+        }
+
+
+        MLog.i(this,"dex init provider="+provider);
+        locationManager.requestLocationUpdates(provider, MIN_TIME, MIN_DISTANCE, this);
     }
 
     public String getLocation() {
         MLog.i(this, "dex getLocation......");
-        locationManager.requestLocationUpdates(provider, 0, 0, this);
         checkProvider();
-        Location location = locationManager.getLastKnownLocation(provider);
-        if (location == null) return null;
+        if (location == null)
+            location = locationManager.getLastKnownLocation(provider);
+        if (location == null){
+            MLog.e(this,"dex location is null.(getLocation()) and will to turn on GPS.");
+            turnOnGPS();
+            return null;
+        }
         String lat = String.valueOf(location.getLatitude());
         String lng = String.valueOf(location.getLongitude());
         return lat + ", " + lng;
     }
+
+
+    public void turnOnGPS(){
+        activity.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+    }
+
 
     private void checkProvider() {
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
@@ -73,6 +114,11 @@ public class MLocationManager implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         MLog.i(this, "dex onLocationChanged (has location=" + hasLocation(location) + ")");
+        this.location = location;
+        String lat = String.valueOf(location.getLatitude());
+        String lng = String.valueOf(location.getLongitude());
+        MLog.d(this, "dex Lat:" + lat + "/Lng:" + lng);
+        activity.setData(lat + ", " + lng, provider+"\n(onLocationChanged)");
     }
 
     /**
@@ -101,6 +147,7 @@ public class MLocationManager implements LocationListener {
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         MLog.i(this, "dex onStatusChanged (provider=" + provider + "/status=" + status + ")");
+        this.provider=provider;
     }
 
     /**
@@ -112,6 +159,8 @@ public class MLocationManager implements LocationListener {
     @Override
     public void onProviderEnabled(String provider) {
         MLog.i(this, "dex onProviderEnabled (provider=" + provider + ")");
+        this.provider = provider;
+        locationManager.requestLocationUpdates(provider, 0, 0, this);
     }
 
     /**
@@ -125,9 +174,11 @@ public class MLocationManager implements LocationListener {
     @Override
     public void onProviderDisabled(String provider) {
         MLog.i(this, "dex onProviderDisabled (provider=" + provider + ")");
+        this.provider = null;
     }
 
     public void close() {
         locationManager.removeUpdates(this);
     }
+
 }

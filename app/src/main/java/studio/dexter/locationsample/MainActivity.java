@@ -46,8 +46,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void getLocation() {
-        if (mLocationManager != null) mLocationManager.close();
-        mLocationManager = new MLocationManager(this);
+        if (mLocationManager == null)
+            mLocationManager = new MLocationManager(this);
         if (mLocationManager.hasProvider()) {
             String location = mLocationManager.getLocation();
             if (TextUtils.isEmpty(location))
@@ -57,6 +57,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         } else {
             tvProvider.setText(getResources().getString(R.string.non_provider));
         }
+    }
+
+    public void setData(String location, String provider) {
+        tvLocation.setText(location);
+        tvProvider.setText(getResources().getString(R.string.provider)+":"+provider);
     }
 
     @Override
