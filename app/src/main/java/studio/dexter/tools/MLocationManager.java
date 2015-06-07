@@ -20,7 +20,7 @@ import studio.dexter.locationsample.MainActivity;
 public class MLocationManager implements LocationListener {
     MainActivity activity;
     LocationManager locationManager;
-    String provider;
+    String provider,changeStatus;
     Location location;
 
     private final long MIN_TIME=2000;
@@ -51,7 +51,7 @@ public class MLocationManager implements LocationListener {
             MLog.i(this,"dex provider list contains NETWORK.");
         }else{
             provider=LocationManager.PASSIVE_PROVIDER;
-            MLog.i(this,"dex provider list just PASSIVE.");
+            MLog.i(this, "dex provider list just PASSIVE.");
         }
 
 
@@ -62,6 +62,7 @@ public class MLocationManager implements LocationListener {
     public String getLocation() {
         MLog.i(this, "dex getLocation......");
         checkProvider();
+        changeStatus="";
         if (location == null)
             location = locationManager.getLastKnownLocation(provider);
         if (location == null){
@@ -118,7 +119,8 @@ public class MLocationManager implements LocationListener {
         String lat = String.valueOf(location.getLatitude());
         String lng = String.valueOf(location.getLongitude());
         MLog.d(this, "dex Lat:" + lat + "/Lng:" + lng);
-        activity.setData(lat + ", " + lng, provider+"\n(onLocationChanged)");
+        this.changeStatus="(onLocationChanged)";
+        activity.setData(lat + ", " + lng, provider);
     }
 
     /**
@@ -181,4 +183,7 @@ public class MLocationManager implements LocationListener {
         locationManager.removeUpdates(this);
     }
 
+    public String getChangeStatus() {
+        return changeStatus;
+    }
 }

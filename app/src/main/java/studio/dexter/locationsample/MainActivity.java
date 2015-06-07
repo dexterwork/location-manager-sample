@@ -12,7 +12,7 @@ import studio.dexter.tools.MLocationManager;
 
 public class MainActivity extends Activity implements View.OnClickListener {
     ImageView imgLocation;
-    TextView tvLocation, tvProvider;
+    TextView tvLocation, tvProvider,tvChangeStatus;
 
     MLocationManager mLocationManager;
 
@@ -28,6 +28,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         imgLocation.setOnClickListener(this);
         tvLocation = (TextView) findViewById(R.id.tvLocation);
         tvProvider = (TextView) findViewById(R.id.tvProvider);
+        tvChangeStatus=(TextView)findViewById(R.id.tvChangeStatus);
 
     }
 
@@ -54,6 +55,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 location = getResources().getString(R.string.non_location);
             tvLocation.setText(location);
             tvProvider.setText(getResources().getString(R.string.provider) + ":" + mLocationManager.getProvider());
+            tvChangeStatus.setText(mLocationManager.getChangeStatus());
         } else {
             tvProvider.setText(getResources().getString(R.string.non_provider));
         }
@@ -62,6 +64,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void setData(String location, String provider) {
         tvLocation.setText(location);
         tvProvider.setText(getResources().getString(R.string.provider)+":"+provider);
+        tvChangeStatus.setText(mLocationManager.getChangeStatus());
     }
 
     @Override
